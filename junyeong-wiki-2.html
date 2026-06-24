@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Junyeong Wiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: #ffffff;
+    color: #1a1a1a;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header {
+    width: 100%;
+    padding: 48px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .logo {
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    color: #1a1a1a;
+    line-height: 1;
+  }
+
+  .logo span { color: #4285f4; }
+  .logo span.g2 { color: #ea4335; }
+  .logo span.g3 { color: #fbbc05; }
+  .logo span.g4 { color: #34a853; }
+
+  .search-wrap {
+    width: 100%;
+    max-width: 580px;
+    padding: 0 20px;
+    margin-top: 28px;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: #f1f3f4;
+    border-radius: 24px;
+    padding: 14px 20px;
+    gap: 12px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+
+  .search-box:focus-within {
+    background: #fff;
+    border-color: #e0e0e0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    font-family: inherit;
+    color: #1a1a1a;
+  }
+
+  .search-box input::placeholder { color: #9aa0a6; }
+
+  .btn-search {
+    background: #4285f4;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .btn-search:hover { background: #2b6de8; }
+  .btn-search svg { width: 16px; height: 16px; fill: #fff; }
+
+  .lang-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 14px 20px 0;
+    max-width: 580px;
+    width: 100%;
+  }
+
+  .lang-tag {
+    font-size: 11px;
+    color: #5f6368;
+    background: #f1f3f4;
+    border-radius: 12px;
+    padding: 4px 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+  }
+
+  .lang-tag:hover { background: #e8eaed; }
+
+  .result-wrap {
+    width: 100%;
+    max-width: 580px;
+    padding: 24px 20px 80px;
+    display: none;
+  }
+
+  .result-wrap.visible { display: block; }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #5f6368;
+    font-size: 14px;
+    padding: 20px 0;
+  }
+
+  .dot-spin { display: flex; gap: 4px; }
+
+  .dot-spin span {
+    width: 7px;
+    height: 7px;
+    background: #4285f4;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+
+  .dot-spin span:nth-child(2) { background: #ea4335; animation-delay: 0.2s; }
+  .dot-spin span:nth-child(3) { background: #fbbc05; animation-delay: 0.4s; }
+  .dot-spin span:nth-child(4) { background: #34a853; animation-delay: 0.6s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40% { transform: translateY(-8px); opacity: 1; }
+  }
+
+  .result-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .result-word {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: #1a1a1a;
+  }
+
+  .result-lang {
+    font-size: 12px;
+    color: #fff;
+    background: #4285f4;
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+
+  .result-pron {
+    font-size: 14px;
+    color: #5f6368;
+    margin-bottom: 20px;
+  }
+
+  .section {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9aa0a6;
+    margin-bottom: 10px;
+  }
+
+  .section-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #3c4043;
+    white-space: pre-wrap;
+  }
+
+  .section-body b { color: #1a1a1a; font-weight: 700; }
+
+  .grammar-chip {
+    display: inline-block;
+    background: #e8f0fe;
+    color: #1967d2;
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 2px 3px 2px 0;
+    font-family: 'Inter', monospace;
+  }
+
+  .error-msg {
+    color: #ea4335;
+    font-size: 14px;
+    padding: 16px 0;
+  }
+
+  .good-btn-wrap {
+    position: fixed;
+    bottom: 28px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    z-index: 100;
+  }
+
+  .good-popup {
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 6px 12px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .good-popup.show { opacity: 1; transform: translateY(0); }
+
+  .good-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #5f6368;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-good {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    transition: transform 0.12s, box-shadow 0.12s;
+    position: relative;
+  }
+
+  .btn-good:active { transform: scale(0.88); box-shadow: 0 1px 4px rgba(0,0,0,0.10); }
+
+  .btn-good .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(66,133,244,0.18);
+    animation: ripple 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes ripple {
+    from { width: 0; height: 0; opacity: 1; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    to { width: 70px; height: 70px; opacity: 0; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  }
+
+  @media (max-width: 400px) {
+    .logo { font-size: 28px; }
+    .result-word { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <span>J</span><span class="g2">u</span><span class="g3">n</span><span class="g4">y</span><span>e</span><span class="g2">o</span><span class="g3">n</span><span class="g4">g</span> <span>W</span><span class="g2">i</span><span class="g3">k</span><span class="g4">i</span>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="영단어를 입력하세요 (예: tell, beautiful)" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="btn-search" onclick="doSearch()">
+      <svg viewBox="0 0 24 24"><path d="M21.71 20.29l-4.55-4.55A8.32 8.32 0 0 0 19 11a8 8 0 1 0-8 8 8.32 8.32 0 0 0 4.74-1.84l4.55 4.55a1 1 0 0 0 1.42-1.42zM5 11a6 6 0 1 1 6 6 6 6 0 0 1-6-6z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="lang-tags">
+  <button class="lang-tag" onclick="quickSearch('tell')">tell</button>
+  <button class="lang-tag" onclick="quickSearch('beautiful')">beautiful</button>
+  <button class="lang-tag" onclick="quickSearch('hello')">hello</button>
+  <button class="lang-tag" onclick="quickSearch('run')">run</button>
+  <button class="lang-tag" onclick="quickSearch('world')">world</button>
+</div>
+
+<div class="result-wrap" id="resultWrap">
+  <div id="resultContent"></div>
+</div>
+
+<div class="good-btn-wrap">
+  <div class="good-popup" id="goodPopup">It feels good</div>
+  <div class="good-count" id="goodCount"></div>
+  <button class="btn-good" id="goodBtn" onclick="pressGood(event)">👍</button>
+</div>
+
+<script>
+  let goodCount = parseInt(localStorage.getItem('jwGood') || '0');
+
+  function updateGoodCount() {
+    const el = document.getElementById('goodCount');
+    el.textContent = goodCount > 0 ? `x${goodCount}` : '';
+  }
+
+  function pressGood(e) {
+    goodCount++;
+    localStorage.setItem('jwGood', goodCount);
+    updateGoodCount();
+
+    const popup = document.getElementById('goodPopup');
+    popup.textContent = `It feels good x${goodCount}`;
+    popup.classList.add('show');
+    clearTimeout(window._goodTimer);
+    window._goodTimer = setTimeout(() => popup.classList.remove('show'), 1800);
+
+    const btn = document.getElementById('goodBtn');
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 500);
+  }
+
+  updateGoodCount();
+
+  function quickSearch(word) {
+    document.getElementById('searchInput').value = word;
+    doSearch();
+  }
+
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  async function doSearch() {
+    const word = document.getElementById('searchInput').value.trim();
+    if (!word) return;
+
+    const wrap = document.getElementById('resultWrap');
+    const content = document.getElementById('resultContent');
+    wrap.classList.add('visible');
+
+    content.innerHTML = `
+      <div class="loading">
+        <div class="dot-spin">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        검색 중...
+      </div>
+    `;
+
+    try {
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+      if (!res.ok) throw new Error('not found');
+      const data = await res.json();
+      renderResult(data[0]);
+    } catch (err) {
+      content.innerHTML = `<div class="error-msg">⚠️ 단어를 찾을 수 없거나 오류가 발생했어. 다른 영단어로 다시 시도해봐!</div>`;
+    }
+  }
+
+  function renderResult(d) {
+    const content = document.getElementById('resultContent');
+
+    let meaningsHTML = '';
+    let examplesHTML = '';
+    let synonymsHTML = '';
+
+    d.meanings.forEach((m, idx) => {
+      meaningsHTML += `<b>[${m.partOfSpeech}]</b><br>`;
+      m.definitions.slice(0, 3).forEach((def, dIdx) => {
+        meaningsHTML += `${dIdx + 1}. ${def.definition}<br>`;
+        if (def.example) {
+          examplesHTML += `• <i>"${def.example}"</i><br>`;
+        }
+      });
+      meaningsHTML += '<br>';
+      if (m.synonyms && m.synonyms.length > 0) {
+        m.synonyms.slice(0, 5).forEach(syn => {
+          synonymsHTML += `<span class="grammar-chip">${syn}</span>`;
+        });
+      }
+    });
+
+    const pronunciation = d.phonetic || (d.phonetics && d.phonetics[0] ? d.phonetics[0].text : '');
+
+    content.innerHTML = `
+      <div class="result-header">
+        <div class="result-word">${escHtml(d.word)}</div>
+        <div class="result-lang">영어 (English)</div>
+      </div>
+      ${pronunciation ? `<div class="result-pron">[${escHtml(pronunciation)}]</div>` : '<div style="height:16px"></div>'}
+      <div class="section">
+        <div class="section-title">뜻 (Definitions)</div>
+        <div class="section-body">${meaningsHTML}</div>
+      </div>
+      ${examplesHTML ? `
+      <div class="section">
+        <div class="section-title">예문 (Examples)</div>
+        <div class="section-body">${examplesHTML}</div>
+      </div>` : ''}
+      ${synonymsHTML ? `
+      <div class="section">
+        <div class="section-title">유의어 (Synonyms)</div>
+        <div class="section-body" style="line-height: 2.2;">${synonymsHTML}</div>
+      </div>` : ''}
+    `;
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+</body>
+</html>
